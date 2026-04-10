@@ -1,0 +1,19 @@
+# Core
+fastapi>=0.111.0
+uvicorn>=0.29.0
+python-multipart>=0.0.9
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+
+# AI
+openai>=1.14.0
+
+# Data processing
+pandas>=2.0.0
+openpyxl>=3.1.0     # Excel support for pandas
+
+# PDF parsing
+pymupdf>=1.24.0
+
+# Document generation
+python-docx>=1.1.0
