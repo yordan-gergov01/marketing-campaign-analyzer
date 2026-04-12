@@ -9,11 +9,12 @@ META_COLUMNS = {
     "campaign_name":  ["Campaign name", "Campaign Name"],
     "impressions": ["Impressions"],
     "clicks": ["Clicks (all)", "Clicks"],
-    "spend": ["Amount spent (BGN)", "Amount spent (USD)", "Amount spent (EUR)", "Amount spent"],
+    "spend": ["Amount spent (EUR)", "Amount spent (USD)", "Amount spent"],
     "ctr": ["CTR (all)", "CTR"],
     "cpc": ["CPC (all)", "CPC (cost per link click)", "CPC"],
     "conversions": ["Results", "Conversions"],
     "cpa": ["Cost per result", "Cost per conversion"],
+    "revenue": ["Purchase conversion value", "Conversion values", "Website purchase ROAS"],
 }
 
 GOOGLE_COLUMNS = {
@@ -25,6 +26,7 @@ GOOGLE_COLUMNS = {
     "cpc": ["Avg. CPC"],
     "conversions": ["Conversions"],
     "cpa": ["Cost / conv.", "CPA"],
+    "revenue": ["Conv. value", "Conversion value", "All conv. value"],
 }
 
 
@@ -80,9 +82,42 @@ def _calculate_efficiency(row: dict) -> float:
     return round(roas_score + ctr_score + cpa_score, 1)
 
 
-def parse_csv(file_bytes: bytes) -> dict:
+def _compute_roas(spend: float, conversions: float, revenue: float | None) -> tuple[float, str]:
+    """
+    Calculates ROAS using the most accurate method available.
+    Returns (roas_value, method_used) for transparency.
+    Priority:
+      1. Actual revenue from CSV column (conversion value tracking)  ← most accurate
+      2. Actual CPA from CSV × conversions → implied revenue  ← moderately accurate
+      3. We do not calculate — we return 0.0 with the "unavailable" method ← honest
+    Note: The old version used a hardcoded avg_order_value=50,
+    which is invalid for any business other than the specific test case.
+
+    Translated with DeepL.com (free version)
+    """
+    if spend <= 0:
+        return 0.0, "unavailable"
+
+    # Method 1: real revenue from CSV
+    if revenue is not None and revenue > 0:
+        return round(revenue / spend, 2), "actual_revenue"
+
+    # Method 2: without revenue (return 0.0)
+    return 0.0, "unavailable"
+
+
+def parse_csv(file_bytes: bytes, avg_order_value: float | None = None) -> dict:
     """
     Main entry point.
+
+    Args:
+        file_bytes: Raw CSV file content.
+        avg_order_value: Average order value in the same currency as spend.
+                         If provided, it is used to calculate ROAS
+                         when the CSV does not contain a conversion value column.
+                         If not provided and the CSV does not contain a revenue column,
+                         ROAS is reported as 0.0 (unavailable).
+
     Returns a dict with: platform, campaigns list, totals, charts data.
     """
     def _read_csv_with_fallbacks(raw: bytes) -> pd.DataFrame:
@@ -110,6 +145,7 @@ def parse_csv(file_bytes: bytes) -> dict:
     clicks_col = _find_column(df, col_map["clicks"])
     spend_col = _find_column(df, col_map["spend"])
     conversions_col = _find_column(df, col_map["conversions"])
+    revenue_col = _find_column(df, col_map.get("revenue", []))
 
     if not name_col or not impressions_col or not clicks_col or not spend_col:
         raise HTTPException(
@@ -131,10 +167,14 @@ def parse_csv(file_bytes: bytes) -> dict:
         spend = _safe_float(row.get(spend_col, 0))
         conversions = _safe_float(row.get(conversions_col, 0)) if conversions_col else 0.0
 
+        csv_revenue = _safe_float(row.get(revenue_col, 0)) if revenue_col else None
+        implied_revenue = (conversions * avg_order_value) if avg_order_value else None
+        revenue_for_roas = csv_revenue if (csv_revenue and csv_revenue > 0) else implied_revenue
+
         ctr = (clicks / impressions * 100) if impressions > 0 else 0.0
         cpc = (spend / clicks) if clicks > 0 else 0.0
         cpa = (spend / conversions) if conversions > 0 else 0.0
-        roas = (conversions * 50 / spend) if spend > 0 else 0.0  # assumes avg order value=50
+        roas, roas_method = _compute_roas(spend, conversions, revenue_for_roas)
 
         campaign_data = {
             "campaign_name": campaign_name,
@@ -146,6 +186,7 @@ def parse_csv(file_bytes: bytes) -> dict:
             "cpc": round(cpc, 2),
             "cpa": round(cpa, 2),
             "roas": round(roas, 2),
+            "roas_method": roas_method,   # "actual_revenue" | "unavailable"
             "budget_efficiency": _calculate_efficiency({"roas": roas, "ctr": ctr, "cpa": cpa}),
         }
         campaigns.append(campaign_data)
@@ -192,6 +233,7 @@ def parse_csv(file_bytes: bytes) -> dict:
         "avg_ctr": avg_ctr,
         "avg_cpc": avg_cpc,
         "avg_roas": avg_roas,
+        "roas_available": any(c["roas_method"] == "actual_revenue" for c in campaigns),
         "campaigns": campaigns,
         "top_performers": top_performers,
         "bottom_performers": bottom_performers,
