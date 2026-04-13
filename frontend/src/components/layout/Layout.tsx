@@ -1,8 +1,8 @@
 import { Routes, Route } from 'react-router-dom'
 import TopBar from './TopBar'
-import DashboardPage from '../../pages/Dashboard'
-import CopyGeneratorPage from '../../pages/CopyGenerator'
-import MediaPlanPage from '../../pages/MediaPlan'
+import DashboardPage from '../../pages/DashboardPage'
+import CopyGeneratorPage from '../../pages/CopyGeneratorPage'
+import MediaPlanPage from '../../pages/MediaPlanPage'
 
  function Layout() {
   return (

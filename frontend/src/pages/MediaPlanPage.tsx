@@ -1,43 +1,25 @@
 import { useState } from 'react'
 import { revisePlan } from '../services/api'
 import type { MediaPlanResponse } from '../types/api-types'
-import { Spinner, Card, SectionTitle, ErrorBanner, Badge, FileDropZone } from '../components/ui'
-
-const CURRENCIES = ['EUR', 'USD', 'GBP']
-const TIMEFRAMES = ['1 month', '3 months', '6 months', '1 year']
-
-const SCENARIO_COLOR: Record<string, string> = {
-  conservative: 'border-zinc-600 bg-zinc-800/40',
-  realistic:    'border-emerald-500/30 bg-emerald-500/5',
-  optimistic:   'border-violet-500/30 bg-violet-500/5',
-}
-const SCENARIO_VALUE_COLOR: Record<string, string> = {
-  conservative: 'text-zinc-300',
-  realistic:    'text-emerald-400',
-  optimistic:   'text-violet-400',
-}
-
-function downloadDocx(base64: string) {
-  const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))
-  const blob  = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' })
-  const url   = URL.createObjectURL(blob)
-  const a     = document.createElement('a')
-  a.href      = url
-  a.download  = 'revised_media_plan.docx'
-  a.click()
-  URL.revokeObjectURL(url)
-}
+import Card from '../components/ui/Card'
+import SectionTitle from '../components/ui/SectionTitle'
+import FileDropZone from '../features/file-uploading/FileDropZone'
+import { CURRENCIES, SCENARIO_COLOR, SCENARIO_VALUE_COLOR, TIMEFRAMES } from '../constants/mediaPlanConstants'
+import Spinner from '../components/ui/Spinner'
+import ErrorBanner from '../components/ui/ErrorBanner'
+import { downloadDocx } from '../lib/utils'
+import Badge from '../components/ui/Badge'
 
 export default function MediaPlanPage() {
-  const [planFile,   setPlanFile]   = useState<File | null>(null)
-  const [csvFile,    setCsvFile]    = useState<File | null>(null)
+  const [planFile, setPlanFile] = useState<File | null>(null)
+  const [csvFile, setCsvFile] = useState<File | null>(null)
   const [objectives, setObjectives] = useState('')
-  const [budget,     setBudget]     = useState('')
-  const [currency,   setCurrency]   = useState('EUR')
-  const [timeframe,  setTimeframe]  = useState('1 month')
-  const [loading,    setLoading]    = useState(false)
-  const [error,      setError]      = useState<string | null>(null)
-  const [data,       setData]       = useState<MediaPlanResponse | null>(null)
+  const [budget, setBudget] = useState('')
+  const [currency, setCurrency] = useState('EUR')
+  const [timeframe, setTimeframe] = useState('1 month')
+  const [loading, setLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
+  const [data, setData] = useState<MediaPlanResponse | null>(null)
 
   const canSubmit = planFile && objectives.trim() && budget && !loading
 
@@ -47,9 +29,9 @@ export default function MediaPlanPage() {
     setError(null)
     try {
       const result = await revisePlan({
-        mediaPlan:      planFile!,
-        newObjectives:  objectives,
-        newBudget:      Number(budget),
+        mediaPlan: planFile!,
+        newObjectives: objectives,
+        newBudget: Number(budget),
         currency,
         timeframe,
         performanceCsv: csvFile ?? undefined,
