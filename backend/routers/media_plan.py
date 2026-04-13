@@ -16,7 +16,7 @@ async def revise_plan(
     media_plan: UploadFile = File(...),
     new_objectives:  str = Form(...),
     new_budget: float = Form(...),
-    currency: str = Form("BGN"),
+    currency: str = Form("EUR"),
     timeframe: str = Form("1 month"),
     performance_csv: Optional[UploadFile] = File(None),
 ):
