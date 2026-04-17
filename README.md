@@ -22,7 +22,6 @@ The application covers three core workflows:
 <img width="1864" height="890" alt="marketing-analyzer-2" src="https://github.com/user-attachments/assets/6c37868e-7285-4267-b8a3-0ca3b4ed2b17" />
 <img width="1870" height="903" alt="marketing-analyzer-3" src="https://github.com/user-attachments/assets/6e64b483-6f63-46a2-8131-5417ad800c80" />
 <img width="1882" height="901" alt="marketing-analyzer-4" src="https://github.com/user-attachments/assets/8f6a5a55-d6e2-476e-bf7c-f3abc7a0e0f1" />
-<img width="1833" height="898" alt="marketing-analyzer-5" src="https://github.com/user-attachments/assets/d5f864c3-442c-474a-941f-609d6babe3d5" />
 <img width="1822" height="886" alt="marketing-analyzer-6" src="https://github.com/user-attachments/assets/a3bdef5b-af14-41da-b3fb-d1673457626a" />
 <img width="1740" height="902" alt="marketing-analyzer-7" src="https://github.com/user-attachments/assets/8eb9f6c4-6ba8-40d8-b00e-d95fd51d10af" />
 <img width="1676" height="901" alt="marketing-analyzer-8" src="https://github.com/user-attachments/assets/e08c11c2-ef1a-484f-82e3-73091b70c311" />
