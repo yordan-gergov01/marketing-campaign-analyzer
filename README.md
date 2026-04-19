@@ -16,6 +16,9 @@ The application covers three core workflows:
 | Media Plan Revision | PDF or DOCX media plan + optional performance CSV | Revised channel breakdown · before/after changes · 3 ROI scenarios · downloadable DOCX |
 
 
+> **⚠️ Demo Notice:** (https://marketing-campaign-analyzer-0n36.onrender.com) — This is a **client-facing demo**, not a production deployment. The backend runs on Render's free tier and may be slow to respond or unavailable. Intended for showcasing the product concept to potential clients.
+
+
 ## Images
 
 <img width="1898" height="904" alt="marketing-analyzer-1" src="https://github.com/user-attachments/assets/294a059d-73b0-41ee-849d-2390b6026e61" />
